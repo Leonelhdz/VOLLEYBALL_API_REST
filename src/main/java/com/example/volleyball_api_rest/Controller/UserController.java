@@ -1,5 +1,4 @@
 package com.example.volleyball_api_rest.Controller;
-
 import com.example.volleyball_api_rest.*;
 import com.example.volleyball_api_rest.Repository.CategoriaRepository;
 import com.example.volleyball_api_rest.Repository.ClubsRepository;
@@ -10,11 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDate;
-import java.time.Period;
-import java.time.ZoneId;
 import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.BeanUtils;
 @RestController
@@ -23,13 +22,10 @@ public class UserController {
 
     @Autowired
     private UserRepository userRepository;
-
     @Autowired
     private ClubsRepository clubsRepository;
-
     @Autowired
     private CategoriaRepository categoriaRepository;
-
     @GetMapping("/user")
     public List<User> getAllUser() {
         return userRepository.findAll();
@@ -50,8 +46,6 @@ public class UserController {
         return userRepository.findByNombre(nombre);
     }
 
-
-    // TODO LISTA USUARIOS POR CLUB
     @GetMapping("/club/userBy/{club_id}")
     public ResponseEntity<List<User>> getUsersByClubId(@PathVariable Integer club_id) {
         List<User> users = userRepository.findUsersByClubId(club_id);
@@ -62,7 +56,6 @@ public class UserController {
         }
     }
 
-    // TODO LISTA USUARIOS POR CATEGORIA
     @GetMapping("/categoria/{categoria_id}/users")
     public ResponseEntity<List<User>> getUsersByCategory(@PathVariable Integer categoria_id) {
         List<User> users = userRepository.findUsersByCategoria_id(categoria_id);
@@ -73,15 +66,12 @@ public class UserController {
         }
     }
 
-
-
     @PostMapping("/crearuser")
     public ResponseEntity<User> createUser(@RequestBody User user, @RequestParam String token) {
         {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
     }
-
 
     @PutMapping("/user/{id}")
     public ResponseEntity<?> updateUser(@PathVariable(value = "id") Integer id, @RequestBody User userToUpdate) {
@@ -104,7 +94,6 @@ public class UserController {
         }
     }
 
-    // Método para obtener los nombres de las propiedades nulas de un objeto
     private String[] getNullPropertyNames(User user) {
         final BeanWrapper src = new BeanWrapperImpl(user);
         java.beans.PropertyDescriptor[] pds = src.getPropertyDescriptors();
@@ -131,7 +120,6 @@ public class UserController {
         }
     }
 
-    // ENDPOINT PARA LA AUTENTICACION (LOGIN)
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(@RequestBody AuthRequest request) {
         User user = userRepository.findByEmail(request.getEmail());
@@ -155,22 +143,42 @@ public class UserController {
             response.put("club_id", user.getClubId());
             return ResponseEntity.ok(response);
         }
-        Map<String, Object> response = new HashMap<>();
-        response.put("error", "Invalid credentials");
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
     }
 
-    // Registro de usuario
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody User user, @RequestParam String codigo_acceso) {
+    public ResponseEntity<Map<String, String>> registerUser(@RequestBody User user, @RequestParam String codigo_acceso, @RequestParam String codigo_secreto) {
         Clubs clubs = clubsRepository.findByCodigoAcceso(codigo_acceso);
         if (clubs == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Código de acceso inválido");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Collections.singletonMap("message", "Código de acceso del club inválido"));
+        }
+
+        Categoria categoria = categoriaRepository.findByCodigo(codigo_secreto);
+        if (categoria == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Collections.singletonMap("message", "Código de acceso de la categoría inválido"));
         }
 
         user.setClubId(clubs.getId());
+        user.setCategoria_id(categoria.getId());
         userRepository.save(user);
 
-        return ResponseEntity.ok("Registro exitoso");
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Registro exitoso");
+        response.put("id", String.valueOf(user.getId()));
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/update-password")
+    public ResponseEntity<?> updatePassword(@RequestParam String email, @RequestParam String newPassword) {
+        Optional<User> optionalUser = userRepository.findUserByEmail(email);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            user.setPassword_hash(newPassword); // Aquí podrías aplicar un hash a la nueva contraseña
+            userRepository.save(user);
+            return ResponseEntity.ok(Collections.singletonMap("message", "Contraseña actualizada con éxito"));
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Collections.singletonMap("message", "Usuario no encontrado"));
+        }
     }
 }

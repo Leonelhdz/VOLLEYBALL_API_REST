@@ -17,4 +17,5 @@ public class Admin {
     private String telefono;
     private String codigo_acceso;
     private String role;
+    private Integer club_id;
 }

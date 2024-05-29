@@ -27,11 +27,19 @@ public class AdminController {
         if (admin != null && admin.getContrasena().equals(request.getPassword())) {
             Map<String, Object> response = new HashMap<>();
             response.put("message", "Login successful");
-            response.put("role", "admin");
+            response.put("role", admin.getRole());
+            response.put("id", admin.getId());
+            response.put("club_id", admin.getClub_id());
+            response.put("nombre", admin.getNombre());
+            response.put("email", admin.getEmail());
+            response.put("direccion", admin.getDireccion());
+            response.put("telefono", admin.getTelefono());
             return ResponseEntity.ok(response);
         }
-        Map<String, Object> response = new HashMap<>();
-        response.put("error", "Invalid credentials");
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+//        Map<String, Object> response = new HashMap<>();
+//        response.put("error", "Invalid credentials");
+//        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
+
     }
 }

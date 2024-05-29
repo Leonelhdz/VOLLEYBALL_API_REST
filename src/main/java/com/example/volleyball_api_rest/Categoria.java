@@ -16,4 +16,5 @@ public class Categoria {
     private Integer edad_max;
     private String nombre_categoria;
     private String sexo;
+    private String codigo_secreto;
 }

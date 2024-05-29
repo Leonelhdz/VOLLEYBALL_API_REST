@@ -1,6 +1,7 @@
 package com.example.volleyball_api_rest.Controller;
 
 import com.example.volleyball_api_rest.AuthRequest;
+import com.example.volleyball_api_rest.Categoria;
 import com.example.volleyball_api_rest.Entrenadores;
 import com.example.volleyball_api_rest.Repository.EntrenadoresRepository;
 import com.example.volleyball_api_rest.User;
@@ -52,9 +53,12 @@ public class EntrenadoresController {
 
 
     @PostMapping("/crearentrenadores")
-    public ResponseEntity<Entrenadores> createEntrenador(@RequestBody Entrenadores entrenadores, @RequestParam String token) {
-        {
-            return new ResponseEntity<>(entrenadoresRepository.save(entrenadores), HttpStatus.OK);
+    public ResponseEntity<?> createEntrenador(@RequestBody Entrenadores entrenadores) {
+        try {
+            Entrenadores newEntrenador = entrenadoresRepository.save(entrenadores);
+            return new ResponseEntity<>(newEntrenador, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -78,15 +82,22 @@ public class EntrenadoresController {
         if (entrenadores != null && entrenadores.getPassword().equals(request.getPassword())) {
             Map<String, Object> response = new HashMap<>();
             response.put("message", "Login successful");
-            response.put("role", "entrenador");
+            response.put("id", entrenadores.getId());
+            response.put("role", entrenadores.getRole());
+            response.put("club_id", entrenadores.getClub_id());
+            response.put("nombre", entrenadores.getNombre());
+            response.put("email", entrenadores.getEmail());
+            response.put("apellidos", entrenadores.getApellidos());
+            response.put("telefono", entrenadores.getTelefono());
+            response.put("certificacion", entrenadores.getCertificacion());
+            response.put("categoria_id", entrenadores.getCategoria_id());
             return ResponseEntity.ok(response);
         }
-        Map<String, Object> response = new HashMap<>();
-        response.put("error", "Invalid credentials");
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+//        Map<String, Object> response = new HashMap<>();
+//        response.put("error", "Invalid credentials");
+//        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
     }
-
-
 
     @DeleteMapping("/entrenadores/{id}")
     public ResponseEntity<?> deleteEntrenadores(@PathVariable(value = "id") Integer id, @RequestParam(value = "token") String token) {
@@ -94,6 +105,16 @@ public class EntrenadoresController {
         if (entrenadores.isPresent()) {
             entrenadoresRepository.delete(entrenadores.get());
             return ResponseEntity.ok().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/entrenadores/club/{clubId}")
+    public ResponseEntity<List<Entrenadores>> getEntrenadoresByClubId(@PathVariable(value = "clubId") Integer club_id) {
+        List<Entrenadores> entrenadores = entrenadoresRepository.findByClubId(club_id);
+        if (!entrenadores.isEmpty()) {
+            return ResponseEntity.ok().body(entrenadores);
         } else {
             return ResponseEntity.notFound().build();
         }

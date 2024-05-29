@@ -1,5 +1,4 @@
 package com.example.volleyball_api_rest;
-
 import lombok.Data;
 
 @Data

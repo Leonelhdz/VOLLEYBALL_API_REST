@@ -1,5 +1,6 @@
 package com.example.volleyball_api_rest.Repository;
 
+import com.example.volleyball_api_rest.Categoria;
 import com.example.volleyball_api_rest.Entrenadores;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -14,4 +15,7 @@ public interface EntrenadoresRepository extends JpaRepository<Entrenadores, Inte
     void delete(Entrenadores entrenadores);
     @Query("SELECT e FROM Entrenadores e JOIN Categoria c ON e.categoria_id = c.id WHERE c.id = ?1")
     Entrenadores findEntrenadoresByCategoria_id(Integer categoria_id);
+
+    @Query("SELECT e FROM Entrenadores e WHERE e.club_id = ?1")
+    List<Entrenadores> findByClubId(Integer club_id);
 }

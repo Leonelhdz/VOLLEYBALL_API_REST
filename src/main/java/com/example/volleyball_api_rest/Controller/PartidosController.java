@@ -25,11 +25,7 @@ public class PartidosController {
     @GetMapping("/categoria/{categoria_id}")
     public ResponseEntity<List<Partidos>> getPartidosByCategoriaId(@PathVariable Integer categoria_id) {
         List<Partidos> partidos = partidosRepository.findByCategoria_id(categoria_id);
-        if (partidos != null && !partidos.isEmpty()) {
             return ResponseEntity.ok().body(partidos);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
     }
 
     // Obtener un partido por ID
