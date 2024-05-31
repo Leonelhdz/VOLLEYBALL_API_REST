@@ -47,14 +47,16 @@ public class CategoriaController {
     }
 
     @GetMapping("/categorias/sinentrenador/club/{clubId}")
-    public ResponseEntity<List<Categoria>> getCategoriasSinEntrenador(@PathVariable(value = "clubId") Integer clubId) {
-        List<Categoria> categorias = categoriaRepository.findCategoriasSinEntrenador(clubId);
+    public ResponseEntity<List<Categoria>> getCategoriasSinEntrenador(@PathVariable(value = "clubId") Integer club_id) {
+        List<Categoria> categorias = categoriaRepository.findCategoriasSinEntrenador(club_id);
         if (!categorias.isEmpty()) {
             return ResponseEntity.ok().body(categorias);
         } else {
+            System.out.println("No categories found for club ID: " + club_id);
             return ResponseEntity.notFound().build();
         }
     }
+
 
     @PostMapping("/Crearcategorias")
     public ResponseEntity<Categoria> createCategoria(@RequestBody Categoria categoria) {

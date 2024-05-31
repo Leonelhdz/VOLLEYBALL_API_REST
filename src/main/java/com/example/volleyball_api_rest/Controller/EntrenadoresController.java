@@ -1,25 +1,27 @@
 package com.example.volleyball_api_rest.Controller;
 
-import com.example.volleyball_api_rest.AuthRequest;
-import com.example.volleyball_api_rest.Categoria;
-import com.example.volleyball_api_rest.Entrenadores;
+import com.example.volleyball_api_rest.*;
 import com.example.volleyball_api_rest.Repository.EntrenadoresRepository;
-import com.example.volleyball_api_rest.User;
+import com.example.volleyball_api_rest.Repository.PartidosRepository;
+import com.example.volleyball_api_rest.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/entrenadores")
 public class EntrenadoresController {
     @Autowired
     private EntrenadoresRepository entrenadoresRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private PartidosRepository partidosRepository;
 
     @GetMapping("/entrenadores")
     public List<Entrenadores> getAllEntrenadores() {
@@ -119,4 +121,44 @@ public class EntrenadoresController {
             return ResponseEntity.notFound().build();
         }
     }
+
+    @PostMapping("/registrarusuario")
+    public ResponseEntity<?> registerUser(@RequestBody UserDTO userDTO) {
+        try {
+            User user = new User();
+            user.setId(userDTO.getId());
+            user.setNombre(userDTO.getNombre());
+            user.setApellidos(userDTO.getApellidos());
+            user.setEmail(userDTO.getEmail());
+            user.setPassword_hash(userDTO.getPassword_hash());
+            user.setFecha_nac(userDTO.getFecha_nac());
+            user.setNivel_juego(userDTO.getNivel_juego());
+            user.setDireccion(userDTO.getDireccion());
+            user.setTelefono(userDTO.getTelefono());
+            user.setTel_responsable(userDTO.getTel_responsable());
+            user.setEmail_responsable(userDTO.getEmail_responsable());
+            user.setCategoria_id(userDTO.getCategoriaId());
+            user.setClubId(userDTO.getClubId());
+            user.setFoto_perfil(userDTO.getFoto_perfil());
+            user.setRole(userDTO.getRole());
+            user.setSexo(userDTO.getSexo());
+
+            User newUser = userRepository.save(user);
+            return new ResponseEntity<>(newUser, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PostMapping("/crearpartido")
+    public ResponseEntity<?> createPartido(@RequestBody Partidos partido) {
+        try {
+            Partidos newPartido = partidosRepository.save(partido);
+            return new ResponseEntity<>(newPartido, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+
 }
