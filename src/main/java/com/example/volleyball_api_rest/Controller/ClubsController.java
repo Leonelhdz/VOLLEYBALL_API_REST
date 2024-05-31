@@ -1,6 +1,7 @@
 package com.example.volleyball_api_rest.Controller;
 
 import com.example.volleyball_api_rest.Clubs;
+import com.example.volleyball_api_rest.Entrenadores;
 import com.example.volleyball_api_rest.Repository.ClubsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -62,9 +63,12 @@ public class ClubsController {
     }
 
     @PostMapping("/Crearclub")
-    public ResponseEntity<Clubs> createClub(@RequestBody Clubs clubs) {
-        {
-            return new ResponseEntity<>(clubsRepository.save(clubs), HttpStatus.OK);
+    public ResponseEntity<?> createClub(@RequestBody Clubs clubs) {
+        try {
+            Clubs newClub = clubsRepository.save(clubs);
+            return new ResponseEntity<>(newClub, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
